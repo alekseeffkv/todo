@@ -1,5 +1,5 @@
-import { FC, useEffect, useState } from 'react';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import { FC, useCallback, useEffect, useState } from 'react';
+import { getDatabase, ref, onValue, update } from 'firebase/database';
 import firebaseApp from '../../firebase';
 import { Todo as TodoType } from '../../types';
 import Todo from '../todo';
@@ -25,10 +25,25 @@ const TodoList: FC = () => {
     });
   }, [db]);
 
+  const changeTodoCompletion = useCallback(
+    ({ id, done }: Pick<TodoType, 'id' | 'done'>) => {
+      const todoRef = ref(db, '/todos/' + id);
+      update(todoRef, { done: !done });
+    },
+    [db]
+  );
+
   return (
     <section className="todolist">
-      {todoList.map((todo) => (
-        <Todo key={todo.id} todo={todo} />
+      {todoList.map(({ id, title, description, done }) => (
+        <Todo
+          key={id}
+          id={id}
+          title={title}
+          description={description}
+          done={done}
+          changeTodoCompletion={changeTodoCompletion}
+        />
       ))}
     </section>
   );
