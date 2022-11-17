@@ -2,6 +2,8 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 
+@import './variables.less';
+
 *,
 *::before,
 *::after {
@@ -62,7 +64,7 @@ select {
 }
 
 main {
-  padding: 64px 16px;
+  padding: 64px @container-padding-x;
 }
 
 h1 {
@@ -73,4 +75,9 @@ h1 {
 h2 {
   font-size: 1.5rem;
   font-weight: 600;
+}
+
+h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
 }

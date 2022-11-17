@@ -1,8 +1,10 @@
+@import '../../variables.less';
+
 .container {
   display: flex;
   flex-direction: column;
   margin: 0 auto;
-  max-width: 500px;
+  max-width: @todos-width;
   & > * + * {
     margin-top: 1.5rem;
   }
