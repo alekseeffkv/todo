@@ -1,29 +1,32 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import Button from '../button';
-import Task from '../task';
-import Taskeditor from '../taskeditor';
+import TodoEditor from '../todoeditor';
+import TodoList from '../todolist';
 import './app.less';
 
 const App: FC = () => {
+  const [isAdding, setAdding] = useState(false);
+
+  const openAdding = () => setAdding(true);
+
+  const closeAdding = () => setAdding(false);
+
   return (
     <main>
-      <Taskeditor formTitle="Новая задача" />
+      {isAdding && (
+        <TodoEditor formTitle="Новая задача" closeAdding={closeAdding} />
+      )}
 
       <div className="container">
         <h1>Список задач</h1>
 
         <section>
-          <Button buttonProps={{ type: 'button' }}>Добавить задачу</Button>
+          <Button buttonProps={{ type: 'button', onClick: openAdding }}>
+            Добавить задачу
+          </Button>
         </section>
 
-        <section>
-          {/* <Task
-            todo={{
-              title: 'Первая задача',
-              description: 'Описание первой задачи',
-            }}
-          /> */}
-        </section>
+        <TodoList />
       </div>
     </main>
   );

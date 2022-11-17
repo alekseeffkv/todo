@@ -2,13 +2,14 @@ import { ChangeEvent, FC, FormEvent, useState } from 'react';
 import { getDatabase, ref, push } from 'firebase/database';
 import firebaseApp from '../../firebase';
 import Button from '../button';
-import './taskeditor.less';
+import './todoeditor.less';
 
-type TaskEditorProps = {
+type TodoEditorProps = {
   formTitle: 'Новая задача' | 'Редактирование задачи';
+  closeAdding(): void;
 };
 
-const TaskEditor: FC<TaskEditorProps> = ({ formTitle }) => {
+const TodoEditor: FC<TodoEditorProps> = ({ formTitle, closeAdding }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
@@ -33,14 +34,16 @@ const TaskEditor: FC<TaskEditorProps> = ({ formTitle }) => {
     };
 
     push(todoRef, todo);
+
+    closeAdding();
   };
 
   return (
-    <div className="task-editor">
-      <form onSubmit={addTodo} className="task-editor__form">
+    <div className="todo-editor">
+      <form onSubmit={addTodo} className="todo-editor__form">
         <h3>{formTitle}</h3>
 
-        <div className="task-editor__item">
+        <div className="todo-editor__item">
           <label htmlFor="title">Название</label>
           <input
             type="text"
@@ -54,7 +57,7 @@ const TaskEditor: FC<TaskEditorProps> = ({ formTitle }) => {
           />
         </div>
 
-        <div className="task-editor__item">
+        <div className="todo-editor__item">
           <label htmlFor="description">Описание</label>
           <textarea
             name="description"
@@ -66,13 +69,15 @@ const TaskEditor: FC<TaskEditorProps> = ({ formTitle }) => {
           ></textarea>
         </div>
 
-        <div className="task-editor__control">
+        <div className="todo-editor__control">
           <Button buttonProps={{ type: 'submit' }}>Создать</Button>
-          <Button buttonProps={{ type: 'button' }}>Отмена</Button>
+          <Button buttonProps={{ type: 'button', onClick: closeAdding }}>
+            Отмена
+          </Button>
         </div>
       </form>
     </div>
   );
 };
 
-export default TaskEditor;
+export default TodoEditor;

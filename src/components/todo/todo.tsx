@@ -1,19 +1,19 @@
 import { FC } from 'react';
-import { Todo } from '../../types';
+import { Todo as TodoType } from '../../types';
 import Button from '../button';
-import './task.less';
+import './todo.less';
 
-type TaskProps = {
-  todo: Todo;
+type TodoProps = {
+  todo: TodoType;
 };
 
-const Task: FC<TaskProps> = ({ todo: { title, description } }) => (
-  <article className="task">
+const Todo: FC<TodoProps> = ({ todo: { title, description } }) => (
+  <article className="todo">
     <h2>{title}</h2>
 
     <p>{description}</p>
 
-    <div className="task__control">
+    <div className="todo__control">
       <Button buttonProps={{ type: 'button' }}>Выполнено</Button>
       <Button buttonProps={{ type: 'button' }}>Редактировать</Button>
       <Button buttonProps={{ type: 'button' }}>Удалить</Button>
@@ -21,4 +21,4 @@ const Task: FC<TaskProps> = ({ todo: { title, description } }) => (
   </article>
 );
 
-export default Task;
+export default Todo;
