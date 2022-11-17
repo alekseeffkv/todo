@@ -7,7 +7,7 @@ import './app.less';
 const App: FC = () => {
   return (
     <main>
-      {/* <Taskeditor title="Добавление задачи" /> */}
+      <Taskeditor formTitle="Новая задача" />
 
       <div className="container">
         <h1>Список задач</h1>
@@ -17,12 +17,12 @@ const App: FC = () => {
         </section>
 
         <section>
-          <Task
+          {/* <Task
             todo={{
               title: 'Первая задача',
               description: 'Описание первой задачи',
             }}
-          />
+          /> */}
         </section>
       </div>
     </main>

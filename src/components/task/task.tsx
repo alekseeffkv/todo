@@ -4,7 +4,7 @@ import Button from '../button';
 import './task.less';
 
 type TaskProps = {
-  todo: Partial<Todo>;
+  todo: Todo;
 };
 
 const Task: FC<TaskProps> = ({ todo: { title, description } }) => (
