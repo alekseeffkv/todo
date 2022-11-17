@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import './App.css';
+import './app.less';
 
 const App: FC = () => <div />;
 
