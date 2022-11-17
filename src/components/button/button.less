@@ -1,18 +1,23 @@
+@import '../../variables.less';
+
 .button {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   outline: 0;
-  border: 1px solid currentColor;
-  border-radius: 4px;
+  border: @border-width solid currentColor;
+  border-radius: @border-radius;
   font-size: 0.875rem;
   font-weight: 500;
   background: none;
   padding: 5px 15px;
   white-space: nowrap;
   cursor: pointer;
+  user-select: none;
   transition: opacity 300ms;
   &:hover {
-    opacity: 0.5;
+    @media (pointer: fine) {
+      opacity: 0.5;
+    }
   }
 }
