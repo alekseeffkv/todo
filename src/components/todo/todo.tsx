@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import dayjs from 'dayjs';
 import { Todo as TodoType } from '../../types';
 import Button from '../button';
 import './todo.less';
@@ -14,18 +15,39 @@ const Todo: FC<TodoProps> = ({
   title,
   description,
   done,
+  completionDate,
   changeCompletion,
   openEditor,
   deleteTodo,
 }) => {
+  const hasExpiredDate = dayjs()
+    .subtract(1, 'day')
+    .isAfter(dayjs(completionDate, 'day'));
+
+  const backgroundColor = done ? '#9ad9ab' : hasExpiredDate ? '#e65247' : '';
+
   return (
-    <article
-      className="todo"
-      style={{ backgroundColor: done ? '#9ad9ab' : '' }}
-    >
+    <article className="todo" style={{ backgroundColor }}>
       <h2>{title}</h2>
 
-      {!!description && <p>{description}</p>}
+      {!!description && (
+        <div className="todo__field">
+          <h4>Описание</h4>
+          <p>{description}</p>
+        </div>
+      )}
+
+      {!!completionDate && (
+        <div className="todo__field">
+          <h4>Дата завершения</h4>
+          <p>{dayjs(completionDate).format('DD.MM.YYYY')}</p>
+        </div>
+      )}
+
+      {/* <div className="todo__field">
+        <h4>Прикрепленные файлы</h4>
+        <p></p>
+      </div> */}
 
       <div className="todo__control">
         <Button

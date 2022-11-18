@@ -53,13 +53,14 @@ const TodoList: FC<TodoListProps> = ({ openEditor }) => {
 
   return (
     <section className="todolist">
-      {todoList.map(({ id, title, description, done }) => (
+      {todoList.map(({ id, title, description, done, completionDate }) => (
         <Todo
           key={id}
           id={id}
           title={title}
           description={description}
           done={done}
+          completionDate={completionDate}
           changeCompletion={changeCompletion}
           openEditor={openEditor}
           deleteTodo={deleteTodo}

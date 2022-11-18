@@ -3,7 +3,7 @@ export type Todo = {
   title: string;
   description: string;
   done: boolean;
-  completionDate?: string;
+  completionDate: string;
   attachedFiles?: string[];
 };
 

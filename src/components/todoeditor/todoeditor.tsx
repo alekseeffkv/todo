@@ -5,25 +5,31 @@ import Button from '../button';
 import './todoeditor.less';
 import { AddAction, EditAction, Todo } from '../../types';
 
+const defaultValues = {
+  title: '',
+  description: '',
+  completionDate: '',
+};
+
 type TodoEditorProps = {
   action: AddAction | EditAction;
   closeEditor(): void;
 };
 
 const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [values, setValues] = useState(defaultValues);
+
+  const { title, description, completionDate } = values;
 
   const { type } = action;
 
   const db = getDatabase(firebaseApp);
 
-  const handleTitle = (e: ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-  };
-
-  const handleDescription = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setDescription(e.target.value);
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setValues((prevValues) => ({ ...prevValues, [name]: value }));
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -36,6 +42,7 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
         title: title.trim(),
         description: description.trim(),
         done: false,
+        completionDate,
       };
 
       push(todoRef, todo);
@@ -43,7 +50,11 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
       const { id } = action;
       const todoRef = ref(db, `/todos/${id}`);
 
-      update(todoRef, { title: title.trim(), description: description.trim() });
+      update(todoRef, {
+        title: title.trim(),
+        description: description.trim(),
+        completionDate,
+      });
     }
 
     closeEditor();
@@ -57,10 +68,10 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
       onValue(
         todoRef,
         (snapshot) => {
-          const { title, description }: Omit<Todo, 'id'> = snapshot.val();
+          const { title, description, completionDate }: Omit<Todo, 'id'> =
+            snapshot.val();
 
-          setTitle(title);
-          setDescription(description);
+          setValues({ title, description, completionDate });
         },
         { onlyOnce: true }
       );
@@ -82,7 +93,7 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
             placeholder="Сделать тестовое задание"
             required
             value={title}
-            onChange={handleTitle}
+            onChange={handleChange}
           />
         </div>
 
@@ -94,8 +105,20 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
             tabIndex={2}
             placeholder="Сверстать UI, написать логику и развернуть на хостинге"
             value={description}
-            onChange={handleDescription}
+            onChange={handleChange}
           ></textarea>
+        </div>
+
+        <div className="todo-editor__item">
+          <label htmlFor="completionDate">Дата завершения</label>
+          <input
+            type="date"
+            name="completionDate"
+            id="completionDate"
+            tabIndex={3}
+            value={completionDate}
+            onChange={handleChange}
+          />
         </div>
 
         <div className="todo-editor__control">
