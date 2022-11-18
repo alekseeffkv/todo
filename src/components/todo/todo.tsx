@@ -4,8 +4,9 @@ import Button from '../button';
 import './todo.less';
 
 type TodoProps = {
-  changeTodoCompletion({ id, done }: Pick<TodoType, 'id' | 'done'>): void;
+  changeCompletion({ id, done }: Pick<TodoType, 'id' | 'done'>): void;
   openEditor({ id }: Pick<TodoType, 'id'>): void;
+  deleteTodo({ id }: Pick<TodoType, 'id'>): void;
 } & TodoType;
 
 const Todo: FC<TodoProps> = ({
@@ -13,8 +14,9 @@ const Todo: FC<TodoProps> = ({
   title,
   description,
   done,
-  changeTodoCompletion,
+  changeCompletion,
   openEditor,
+  deleteTodo,
 }) => {
   return (
     <article
@@ -29,7 +31,7 @@ const Todo: FC<TodoProps> = ({
         <Button
           buttonProps={{
             type: 'button',
-            onClick: () => changeTodoCompletion({ id, done }),
+            onClick: () => changeCompletion({ id, done }),
           }}
         >
           {done ? 'Начать' : 'Завершить'}
@@ -39,7 +41,11 @@ const Todo: FC<TodoProps> = ({
         >
           Редактировать
         </Button>
-        <Button buttonProps={{ type: 'button' }}>Удалить</Button>
+        <Button
+          buttonProps={{ type: 'button', onClick: () => deleteTodo({ id }) }}
+        >
+          Удалить
+        </Button>
       </div>
     </article>
   );

@@ -1,5 +1,12 @@
 import { FC, useCallback, useEffect, useState } from 'react';
-import { getDatabase, ref, onValue, update } from 'firebase/database';
+import {
+  getDatabase,
+  ref,
+  onValue,
+  update,
+  remove,
+  off,
+} from 'firebase/database';
 import firebaseApp from '../../firebase';
 import { Todo as TodoType } from '../../types';
 import Todo from '../todo';
@@ -27,10 +34,19 @@ const TodoList: FC<TodoListProps> = ({ openEditor }) => {
     });
   }, [db]);
 
-  const changeTodoCompletion = useCallback(
+  const changeCompletion = useCallback(
     ({ id, done }: Pick<TodoType, 'id' | 'done'>) => {
       const todoRef = ref(db, `/todos/${id}`);
       update(todoRef, { done: !done });
+    },
+    [db]
+  );
+
+  const deleteTodo = useCallback(
+    ({ id }: Pick<TodoType, 'id'>) => {
+      const todoRef = ref(db, `/todos/${id}`);
+      remove(todoRef);
+      off(todoRef);
     },
     [db]
   );
@@ -44,8 +60,9 @@ const TodoList: FC<TodoListProps> = ({ openEditor }) => {
           title={title}
           description={description}
           done={done}
-          changeTodoCompletion={changeTodoCompletion}
+          changeCompletion={changeCompletion}
           openEditor={openEditor}
+          deleteTodo={deleteTodo}
         />
       ))}
     </section>
