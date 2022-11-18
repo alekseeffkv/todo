@@ -1,20 +1,34 @@
-import { FC, useState } from 'react';
+import { FC, useCallback, useState } from 'react';
+import { Todo as TodoType } from '../../types';
 import Button from '../button';
 import TodoEditor from '../todoeditor';
 import TodoList from '../todolist';
 import './app.less';
 
+const initialEditing = { id: '', isEditing: false };
+
 const App: FC = () => {
   const [isAdding, setAdding] = useState(false);
+  const [editing, setEditing] = useState(initialEditing);
+
+  const { id, isEditing } = editing;
 
   const openAdding = () => setAdding(true);
-
   const closeAdding = () => setAdding(false);
+
+  const openEditing = useCallback(({ id }: Pick<TodoType, 'id'>) => {
+    setEditing({ id, isEditing: true });
+  }, []);
+  const closeEditing = () => setEditing(initialEditing);
 
   return (
     <main>
       {isAdding && (
-        <TodoEditor formTitle="Новая задача" closeAdding={closeAdding} />
+        <TodoEditor action={{ type: 'add' }} closeEditor={closeAdding} />
+      )}
+
+      {isEditing && (
+        <TodoEditor action={{ type: 'edit', id }} closeEditor={closeEditing} />
       )}
 
       <div className="container">
@@ -26,7 +40,7 @@ const App: FC = () => {
           </Button>
         </section>
 
-        <TodoList />
+        <TodoList openEditor={openEditing} />
       </div>
     </main>
   );

@@ -5,7 +5,9 @@ import { Todo as TodoType } from '../../types';
 import Todo from '../todo';
 import './todolist.less';
 
-const TodoList: FC = () => {
+type TodoListProps = { openEditor({ id }: Pick<TodoType, 'id'>): void };
+
+const TodoList: FC<TodoListProps> = ({ openEditor }) => {
   const [todoList, setTodoList] = useState<TodoType[]>([]);
 
   const db = getDatabase(firebaseApp);
@@ -27,7 +29,7 @@ const TodoList: FC = () => {
 
   const changeTodoCompletion = useCallback(
     ({ id, done }: Pick<TodoType, 'id' | 'done'>) => {
-      const todoRef = ref(db, '/todos/' + id);
+      const todoRef = ref(db, `/todos/${id}`);
       update(todoRef, { done: !done });
     },
     [db]
@@ -43,6 +45,7 @@ const TodoList: FC = () => {
           description={description}
           done={done}
           changeTodoCompletion={changeTodoCompletion}
+          openEditor={openEditor}
         />
       ))}
     </section>

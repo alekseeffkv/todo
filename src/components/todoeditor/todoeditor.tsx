@@ -1,47 +1,76 @@
-import { ChangeEvent, FC, FormEvent, useState } from 'react';
-import { getDatabase, ref, push } from 'firebase/database';
+import { ChangeEvent, FC, FormEvent, useEffect, useState } from 'react';
+import { getDatabase, ref, push, onValue, update } from 'firebase/database';
 import firebaseApp from '../../firebase';
 import Button from '../button';
 import './todoeditor.less';
+import { AddAction, EditAction, Todo } from '../../types';
 
 type TodoEditorProps = {
-  formTitle: 'Новая задача' | 'Редактирование задачи';
-  closeAdding(): void;
+  action: AddAction | EditAction;
+  closeEditor(): void;
 };
 
-const TodoEditor: FC<TodoEditorProps> = ({ formTitle, closeAdding }) => {
+const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+
+  const { type } = action;
 
   const db = getDatabase(firebaseApp);
 
   const handleTitle = (e: ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value.trim());
+    setTitle(e.target.value);
   };
 
   const handleDescription = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setDescription(e.target.value.trim());
+    setDescription(e.target.value);
   };
 
-  const addTodo = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const todoRef = ref(db, '/todos');
+    if (type === 'add') {
+      const todoRef = ref(db, '/todos');
 
-    const todo = {
-      title,
-      done: false,
-    };
+      const todo = {
+        title: title.trim(),
+        description: description.trim(),
+        done: false,
+      };
 
-    push(todoRef, todo);
+      push(todoRef, todo);
+    } else {
+      const { id } = action;
+      const todoRef = ref(db, `/todos/${id}`);
 
-    closeAdding();
+      update(todoRef, { title: title.trim(), description: description.trim() });
+    }
+
+    closeEditor();
   };
+
+  useEffect(() => {
+    if (type === 'edit') {
+      const { id } = action;
+      const todoRef = ref(db, `/todos/${id}`);
+
+      onValue(
+        todoRef,
+        (snapshot) => {
+          const { title, description }: Omit<Todo, 'id'> = snapshot.val();
+
+          setTitle(title);
+          setDescription(description);
+        },
+        { onlyOnce: true }
+      );
+    }
+  }, [action, db, type]);
 
   return (
     <div className="todo-editor">
-      <form onSubmit={addTodo} className="todo-editor__form">
-        <h3>{formTitle}</h3>
+      <form onSubmit={handleSubmit} className="todo-editor__form">
+        <h3>{type === 'add' ? 'Новая задача' : 'Редактирование задачи'}</h3>
 
         <div className="todo-editor__item">
           <label htmlFor="title">Название</label>
@@ -70,8 +99,10 @@ const TodoEditor: FC<TodoEditorProps> = ({ formTitle, closeAdding }) => {
         </div>
 
         <div className="todo-editor__control">
-          <Button buttonProps={{ type: 'submit' }}>Создать</Button>
-          <Button buttonProps={{ type: 'button', onClick: closeAdding }}>
+          <Button buttonProps={{ type: 'submit' }}>
+            {type === 'add' ? 'Создать' : 'Сохранить'}
+          </Button>
+          <Button buttonProps={{ type: 'button', onClick: closeEditor }}>
             Отмена
           </Button>
         </div>

@@ -1,8 +1,12 @@
 export type Todo = {
   id: string;
   title: string;
+  description: string;
   done: boolean;
-  description?: string;
   completionDate?: string;
   attachedFiles?: string[];
 };
+
+export type AddAction = { type: 'add' };
+
+export type EditAction = { type: 'edit'; id: string };

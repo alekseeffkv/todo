@@ -5,6 +5,7 @@ import './todo.less';
 
 type TodoProps = {
   changeTodoCompletion({ id, done }: Pick<TodoType, 'id' | 'done'>): void;
+  openEditor({ id }: Pick<TodoType, 'id'>): void;
 } & TodoType;
 
 const Todo: FC<TodoProps> = ({
@@ -13,6 +14,7 @@ const Todo: FC<TodoProps> = ({
   description,
   done,
   changeTodoCompletion,
+  openEditor,
 }) => {
   return (
     <article
@@ -21,7 +23,7 @@ const Todo: FC<TodoProps> = ({
     >
       <h2>{title}</h2>
 
-      <p>{description}</p>
+      {!!description && <p>{description}</p>}
 
       <div className="todo__control">
         <Button
@@ -32,7 +34,11 @@ const Todo: FC<TodoProps> = ({
         >
           {done ? 'Начать' : 'Завершить'}
         </Button>
-        <Button buttonProps={{ type: 'button' }}>Редактировать</Button>
+        <Button
+          buttonProps={{ type: 'button', onClick: () => openEditor({ id }) }}
+        >
+          Редактировать
+        </Button>
         <Button buttonProps={{ type: 'button' }}>Удалить</Button>
       </div>
     </article>
