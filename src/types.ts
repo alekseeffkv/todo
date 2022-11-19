@@ -6,7 +6,7 @@ export type Todo = {
   description: string;
   done: boolean;
   completionDate: string;
-  attachedFiles: AttachedFile[];
+  attachedFiles?: AttachedFile[];
 };
 
 export type AddAction = { type: 'add' };

@@ -1,5 +1,12 @@
 import { ChangeEvent, FC, SyntheticEvent, useEffect, useState } from 'react';
-import { getDatabase, ref, push, onValue, update } from 'firebase/database';
+import {
+  getDatabase,
+  ref,
+  push,
+  onValue,
+  update,
+  set,
+} from 'firebase/database';
 import {
   ref as storageRef,
   getDownloadURL,
@@ -53,10 +60,10 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
     setLoading(true);
 
     const target = e.target as typeof e.target & {
-      attachedFiles: { files: FileList };
+      attachedFiles: { files: FileList | null };
     };
 
-    const fileList = Array.from(target.attachedFiles.files);
+    const fileList = Array.from(target.attachedFiles.files || []);
     const promises: Promise<AttachedFile>[] = [];
 
     const uploadFileAsPromise = (file: File): Promise<AttachedFile> => {
@@ -99,13 +106,15 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
         } else {
           const { id } = action;
           const todoRef = ref(db, `/todos/${id}`);
+          const attachedFilesRef = ref(db, `/todos/${id}/attachedFiles`);
 
           update(todoRef, {
             title: title.trim(),
             description: description.trim(),
             completionDate,
-            attachedFiles: resolve,
           });
+
+          if (resolve.length > 0) set(attachedFilesRef, resolve);
         }
 
         closeEditor();
@@ -130,7 +139,7 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
           }: Omit<Todo, 'id'> = snapshot.val();
 
           setValues({ title, description, completionDate });
-          setFiles(attachedFiles);
+          setFiles(attachedFiles || []);
         },
         { onlyOnce: true }
       );
