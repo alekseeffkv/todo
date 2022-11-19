@@ -1,4 +1,5 @@
 @import '../../variables.less';
+@import '../button/button.less';
 
 .todo-editor {
   display: flex;
@@ -20,6 +21,8 @@
     padding: @inner-padding;
     width: 100%;
     max-width: @todo-editor-width;
+    max-height: 90vh;
+    overflow: auto;
     & > * + * {
       margin-top: 1rem;
     }
@@ -33,12 +36,22 @@
     label {
       font-size: 0.875rem;
       font-weight: 500;
+      &[for='attachedFiles'] {
+        .button();
+        align-self: flex-start;
+      }
     }
     input,
     textarea {
       padding: 5px;
       outline-color: currentColor;
       max-width: 100%;
+    }
+    input[type='file'] {
+      display: none;
+    }
+    li {
+      font-size: 0.875rem;
     }
   }
   &__control {

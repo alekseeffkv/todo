@@ -16,6 +16,7 @@ const Todo: FC<TodoProps> = ({
   description,
   done,
   completionDate,
+  attachedFiles,
   changeCompletion,
   openEditor,
   deleteTodo,
@@ -44,10 +45,16 @@ const Todo: FC<TodoProps> = ({
         </div>
       )}
 
-      {/* <div className="todo__field">
+      <div className="todo__field">
         <h4>Прикрепленные файлы</h4>
-        <p></p>
-      </div> */}
+        {attachedFiles.length > 0 && (
+          <ul>
+            {attachedFiles.map(({ name, url }) => (
+              <li key={url}>{name}</li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div className="todo__control">
         <Button

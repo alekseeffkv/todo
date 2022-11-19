@@ -1,9 +1,14 @@
-import { ChangeEvent, FC, FormEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FC, SyntheticEvent, useEffect, useState } from 'react';
 import { getDatabase, ref, push, onValue, update } from 'firebase/database';
-import firebaseApp from '../../firebase';
+import {
+  ref as storageRef,
+  getDownloadURL,
+  uploadBytesResumable,
+} from 'firebase/storage';
+import { firebaseApp, storage } from '../../firebase';
 import Button from '../button';
 import './todoeditor.less';
-import { AddAction, EditAction, Todo } from '../../types';
+import { AddAction, AttachedFile, EditAction, Todo } from '../../types';
 
 const defaultValues = {
   title: '',
@@ -18,6 +23,7 @@ type TodoEditorProps = {
 
 const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
   const [values, setValues] = useState(defaultValues);
+  const [files, setFiles] = useState<AttachedFile[]>([]);
 
   const { title, description, completionDate } = values;
 
@@ -25,39 +31,82 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
 
   const db = getDatabase(firebaseApp);
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
+  const handleChange = ({
+    target: { name, value },
+  }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setValues((prevValues) => ({ ...prevValues, [name]: value }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleFiles = ({
+    target: { files },
+  }: ChangeEvent<HTMLInputElement>) => {
+    if (!files) return;
+
+    setFiles(Array.from(files).map(({ name }) => ({ name, url: '' })));
+  };
+
+  const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
 
-    if (type === 'add') {
-      const todoRef = ref(db, '/todos');
+    const target = e.target as typeof e.target & {
+      attachedFiles: { files: FileList };
+    };
 
-      const todo = {
-        title: title.trim(),
-        description: description.trim(),
-        done: false,
-        completionDate,
-      };
+    const fileList = Array.from(target.attachedFiles.files);
+    const promises: Promise<AttachedFile>[] = [];
 
-      push(todoRef, todo);
-    } else {
-      const { id } = action;
-      const todoRef = ref(db, `/todos/${id}`);
+    const uploadFileAsPromise = (file: File): Promise<AttachedFile> => {
+      return new Promise((resolve, reject) => {
+        const { name } = file;
+        const fileRef = storageRef(storage, `files/${name}`);
+        const uploadTask = uploadBytesResumable(fileRef, file);
 
-      update(todoRef, {
-        title: title.trim(),
-        description: description.trim(),
-        completionDate,
+        uploadTask.on(
+          'state_changed',
+          null,
+          (error) => reject(error),
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              resolve({ name, url: downloadURL });
+            });
+          }
+        );
       });
-    }
+    };
 
-    closeEditor();
+    fileList.forEach((file) => {
+      promises.push(uploadFileAsPromise(file));
+    });
+
+    Promise.all(promises)
+      .then((resolve) => {
+        if (type === 'add') {
+          const todoRef = ref(db, '/todos');
+
+          const todo = {
+            title: title.trim(),
+            description: description.trim(),
+            done: false,
+            completionDate,
+            attachedFiles: resolve,
+          };
+
+          push(todoRef, todo);
+        } else {
+          const { id } = action;
+          const todoRef = ref(db, `/todos/${id}`);
+
+          update(todoRef, {
+            title: title.trim(),
+            description: description.trim(),
+            completionDate,
+            attachedFiles: resolve,
+          });
+        }
+
+        closeEditor();
+      })
+      .catch((err) => alert(err));
   };
 
   useEffect(() => {
@@ -68,10 +117,15 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
       onValue(
         todoRef,
         (snapshot) => {
-          const { title, description, completionDate }: Omit<Todo, 'id'> =
-            snapshot.val();
+          const {
+            title,
+            description,
+            completionDate,
+            attachedFiles,
+          }: Omit<Todo, 'id'> = snapshot.val();
 
           setValues({ title, description, completionDate });
+          setFiles(attachedFiles);
         },
         { onlyOnce: true }
       );
@@ -118,6 +172,27 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
             tabIndex={3}
             value={completionDate}
             onChange={handleChange}
+          />
+        </div>
+
+        <div className="todo-editor__item">
+          <label>Прикрепленные файлы</label>
+
+          {files.length > 0 && (
+            <ul>
+              {files.map(({ name }) => (
+                <li key={name}>{name}</li>
+              ))}
+            </ul>
+          )}
+
+          <label htmlFor="attachedFiles">Выбрать файлы</label>
+          <input
+            type="file"
+            name="attachedFiles"
+            id="attachedFiles"
+            multiple
+            onChange={handleFiles}
           />
         </div>
 
