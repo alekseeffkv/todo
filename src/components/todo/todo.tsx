@@ -5,11 +5,15 @@ import Button from '../button';
 import './todo.less';
 
 type TodoProps = {
+  /**Колбэк изменения состояния завершения задачи */
   changeCompletion({ id, done }: Pick<TodoType, 'id' | 'done'>): void;
+  /**Колбэк вызова редактора задачи */
   openEditor({ id }: Pick<TodoType, 'id'>): void;
+  /**Колбэк удаления задачи */
   deleteTodo({ id }: Pick<TodoType, 'id'>): void;
 } & TodoType;
 
+/**Компонент задачи*/
 const Todo: FC<TodoProps> = ({
   id,
   title,
@@ -21,6 +25,9 @@ const Todo: FC<TodoProps> = ({
   openEditor,
   deleteTodo,
 }) => {
+  /**
+   * Истекла ли дата завершения задачи
+   */
   const hasExpiredDate = dayjs()
     .subtract(1, 'day')
     .isAfter(dayjs(completionDate, 'day'));

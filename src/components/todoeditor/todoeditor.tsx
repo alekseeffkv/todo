@@ -15,7 +15,7 @@ import {
 import { firebaseApp, storage } from '../../firebase';
 import Button from '../button';
 import './todoeditor.less';
-import { AddAction, AttachedFile, EditAction, Todo } from '../../types';
+import { AddMode, AttachedFile, EditMode, Todo } from '../../types';
 import Loader from '../loader';
 
 const defaultValues = {
@@ -25,18 +25,21 @@ const defaultValues = {
 };
 
 type TodoEditorProps = {
-  action: AddAction | EditAction;
+  /**Режит работы редактора */
+  mode: AddMode | EditMode;
+  /**Колбэк закрытия редактора */
   closeEditor(): void;
 };
 
-const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
+/**Компонент редактора задачи */
+const TodoEditor: FC<TodoEditorProps> = ({ mode, closeEditor }) => {
   const [values, setValues] = useState(defaultValues);
   const [files, setFiles] = useState<AttachedFile[]>([]);
   const [isLoading, setLoading] = useState(false);
 
   const { title, description, completionDate } = values;
 
-  const { type } = action;
+  const { type } = mode;
 
   const db = getDatabase(firebaseApp);
 
@@ -66,6 +69,11 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
     const fileList = Array.from(target.attachedFiles.files || []);
     const promises: Promise<AttachedFile>[] = [];
 
+    /**
+     * Функция загрузки файла на Firebase Storage
+     * @param file файл для загрузки
+     * @returns промис, который при успешном выполнении возвращает объект с именем и url загруженного файла
+     */
     const uploadFileAsPromise = (file: File): Promise<AttachedFile> => {
       return new Promise((resolve, reject) => {
         const { name } = file;
@@ -89,6 +97,7 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
       promises.push(uploadFileAsPromise(file));
     });
 
+    //После загрузки всех файлов добавляем или обновляем задачу в базе данных
     Promise.all(promises)
       .then((resolve) => {
         if (type === 'add') {
@@ -104,7 +113,7 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
 
           push(todoRef, todo);
         } else {
-          const { id } = action;
+          const { id } = mode;
           const todoRef = ref(db, `/todos/${id}`);
           const attachedFilesRef = ref(db, `/todos/${id}/attachedFiles`);
 
@@ -125,7 +134,7 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
 
   useEffect(() => {
     if (type === 'edit') {
-      const { id } = action;
+      const { id } = mode;
       const todoRef = ref(db, `/todos/${id}`);
 
       onValue(
@@ -144,7 +153,7 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
         { onlyOnce: true }
       );
     }
-  }, [action, db, type]);
+  }, [mode, db, type]);
 
   return (
     <>

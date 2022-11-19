@@ -12,8 +12,12 @@ import { Todo as TodoType } from '../../types';
 import Todo from '../todo';
 import './todolist.less';
 
-type TodoListProps = { openEditor({ id }: Pick<TodoType, 'id'>): void };
+type TodoListProps = {
+  /**Колбэк открытия редактора */
+  openEditor({ id }: Pick<TodoType, 'id'>): void;
+};
 
+/**Компонет списка задач */
 const TodoList: FC<TodoListProps> = ({ openEditor }) => {
   const [todoList, setTodoList] = useState<TodoType[]>([]);
 

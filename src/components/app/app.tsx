@@ -24,11 +24,11 @@ const App: FC = () => {
   return (
     <main>
       {isAdding && (
-        <TodoEditor action={{ type: 'add' }} closeEditor={closeAdding} />
+        <TodoEditor mode={{ type: 'add' }} closeEditor={closeAdding} />
       )}
 
       {isEditing && (
-        <TodoEditor action={{ type: 'edit', id }} closeEditor={closeEditing} />
+        <TodoEditor mode={{ type: 'edit', id }} closeEditor={closeEditing} />
       )}
 
       <div className="container">

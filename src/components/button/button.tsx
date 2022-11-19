@@ -3,6 +3,7 @@ import './button.less';
 
 type ButtonProps = {
   children: ReactNode;
+  /**Атрибуты тега Button */
   buttonProps: ButtonHTMLAttributes<HTMLButtonElement>;
 };
 
