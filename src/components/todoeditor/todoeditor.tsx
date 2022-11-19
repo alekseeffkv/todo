@@ -9,6 +9,7 @@ import { firebaseApp, storage } from '../../firebase';
 import Button from '../button';
 import './todoeditor.less';
 import { AddAction, AttachedFile, EditAction, Todo } from '../../types';
+import Loader from '../loader';
 
 const defaultValues = {
   title: '',
@@ -24,6 +25,7 @@ type TodoEditorProps = {
 const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
   const [values, setValues] = useState(defaultValues);
   const [files, setFiles] = useState<AttachedFile[]>([]);
+  const [isLoading, setLoading] = useState(false);
 
   const { title, description, completionDate } = values;
 
@@ -47,6 +49,8 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
+
+    setLoading(true);
 
     const target = e.target as typeof e.target & {
       attachedFiles: { files: FileList };
@@ -106,7 +110,8 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
 
         closeEditor();
       })
-      .catch((err) => alert(err));
+      .catch((err) => alert(err))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -133,79 +138,84 @@ const TodoEditor: FC<TodoEditorProps> = ({ action, closeEditor }) => {
   }, [action, db, type]);
 
   return (
-    <div className="todo-editor">
-      <form onSubmit={handleSubmit} className="todo-editor__form">
-        <h3>{type === 'add' ? 'Новая задача' : 'Редактирование задачи'}</h3>
+    <>
+      {isLoading && <Loader />}
 
-        <div className="todo-editor__item">
-          <label htmlFor="title">Название</label>
-          <input
-            type="text"
-            name="title"
-            id="title"
-            tabIndex={1}
-            placeholder="Сделать тестовое задание"
-            required
-            value={title}
-            onChange={handleChange}
-          />
-        </div>
+      <div className="todo-editor">
+        <form onSubmit={handleSubmit} className="todo-editor__form">
+          <h3>{type === 'add' ? 'Новая задача' : 'Редактирование задачи'}</h3>
 
-        <div className="todo-editor__item">
-          <label htmlFor="description">Описание</label>
-          <textarea
-            name="description"
-            id="description"
-            tabIndex={2}
-            placeholder="Сверстать UI, написать логику и развернуть на хостинге"
-            value={description}
-            onChange={handleChange}
-          ></textarea>
-        </div>
+          <div className="todo-editor__field">
+            <label htmlFor="title">Название</label>
+            <input
+              type="text"
+              name="title"
+              id="title"
+              tabIndex={1}
+              placeholder="Сделать тестовое задание"
+              required
+              value={title}
+              onChange={handleChange}
+            />
+          </div>
 
-        <div className="todo-editor__item">
-          <label htmlFor="completionDate">Дата завершения</label>
-          <input
-            type="date"
-            name="completionDate"
-            id="completionDate"
-            tabIndex={3}
-            value={completionDate}
-            onChange={handleChange}
-          />
-        </div>
+          <div className="todo-editor__field">
+            <label htmlFor="description">Описание</label>
+            <textarea
+              name="description"
+              id="description"
+              tabIndex={2}
+              placeholder="Сверстать UI, написать логику и развернуть на хостинге"
+              value={description}
+              onChange={handleChange}
+            ></textarea>
+          </div>
 
-        <div className="todo-editor__item">
-          <label>Прикрепленные файлы</label>
+          <div className="todo-editor__field">
+            <label htmlFor="completionDate">Дата завершения</label>
+            <input
+              type="date"
+              name="completionDate"
+              id="completionDate"
+              tabIndex={3}
+              value={completionDate}
+              onChange={handleChange}
+            />
+          </div>
 
-          {files.length > 0 && (
-            <ul>
-              {files.map(({ name }) => (
-                <li key={name}>{name}</li>
-              ))}
-            </ul>
-          )}
+          <div className="todo-editor__field">
+            <label>Прикрепленные файлы</label>
 
-          <label htmlFor="attachedFiles">Выбрать файлы</label>
-          <input
-            type="file"
-            name="attachedFiles"
-            id="attachedFiles"
-            multiple
-            onChange={handleFiles}
-          />
-        </div>
+            {files.length > 0 && (
+              <ul>
+                {files.map(({ name }) => (
+                  <li key={name}>{name}</li>
+                ))}
+              </ul>
+            )}
 
-        <div className="todo-editor__control">
-          <Button buttonProps={{ type: 'submit' }}>
-            {type === 'add' ? 'Создать' : 'Сохранить'}
-          </Button>
-          <Button buttonProps={{ type: 'button', onClick: closeEditor }}>
-            Отмена
-          </Button>
-        </div>
-      </form>
-    </div>
+            <label htmlFor="attachedFiles">Выбрать файлы</label>
+            <input
+              type="file"
+              name="attachedFiles"
+              id="attachedFiles"
+              multiple
+              onChange={handleFiles}
+            />
+          </div>
+
+          <div className="todo-editor__control">
+            <Button buttonProps={{ type: 'submit' }}>
+              {type === 'add' ? 'Создать' : 'Сохранить'}
+            </Button>
+
+            <Button buttonProps={{ type: 'button', onClick: closeEditor }}>
+              Отмена
+            </Button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 };
 
