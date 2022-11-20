@@ -67,7 +67,6 @@ const TodoEditor: FC<TodoEditorProps> = ({ mode, closeEditor }) => {
     };
 
     const fileList = Array.from(target.attachedFiles.files || []);
-    const promises: Promise<AttachedFile>[] = [];
 
     /**
      * Функция загрузки файла на Firebase Storage
@@ -93,9 +92,9 @@ const TodoEditor: FC<TodoEditorProps> = ({ mode, closeEditor }) => {
       });
     };
 
-    fileList.forEach((file) => {
-      promises.push(uploadFileAsPromise(file));
-    });
+    const promises: Promise<AttachedFile>[] = fileList.map((file) =>
+      uploadFileAsPromise(file)
+    );
 
     //После загрузки всех файлов добавляем или обновляем задачу в базе данных
     Promise.all(promises)
