@@ -52,16 +52,16 @@ const Todo: FC<TodoProps> = ({
         </div>
       )}
 
-      <div className="todo__field">
-        <h4>Прикрепленные файлы</h4>
-        {attachedFiles && attachedFiles.length > 0 && (
+      {!!attachedFiles?.length && (
+        <div className="todo__field">
+          <h4>Прикрепленные файлы</h4>
           <ul>
             {attachedFiles.map(({ name, url }) => (
               <li key={url}>{name}</li>
             ))}
           </ul>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="todo__control">
         <Button
